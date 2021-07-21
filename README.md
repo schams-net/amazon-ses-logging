@@ -6,9 +6,9 @@ This Git repository contains a simple prototype of an [Amazon Lambda](https://aw
 
 ## Background
 
-[Amazon Simple Email Service (SES)](https://aws.amazon.com/ses/) is a high-scale inbound/outbound cloud email service offered by Amazon Web Services (AWS). Compared to traditional SMTP solutions, the service lacks a proper logging functionality that lets system administrators review/debug what happens with emails once they were handed over from the origin system to Amazon SES.
+[Amazon Simple Email Service (SES)](https://aws.amazon.com/ses/) is a high-scale inbound/outbound cloud email service offered by Amazon Web Services (AWS). Compared to traditional SMTP solutions, the service lacks a proper logging functionality that lets system administrators review/debug what happens with emails once they were handed over from the origin system to Amazon SES. This topic was discussed in the [AWS Forum](https://forums.aws.amazon.com/thread.jspa?messageID=990457).
 
-This was discussed in the [AWS Forum](https://forums.aws.amazon.com/thread.jspa?messageID=990457). I wrote a simple Lambda function in Node.js version 10 that logs the email meta data to a S3 bucket, and shared the general concept in the forum thread. After receiving several requests from the broader community to share the Node.js function, I published the code at [GitHub](https://github.com/schams-net/amazon-ses-logging).
+I wrote a simple Lambda function in Node.js version 10 that logs the email meta data to a S3 bucket. I shared the general concept in the forum thread in October 2018. After receiving several requests from the broader community on Twitter, through email, etc. to share the function, I published the code at [GitHub](https://github.com/schams-net/amazon-ses-logging).
 
 ## Prototype
 
@@ -16,11 +16,13 @@ It is important to understand that this code is a **prototype** and serves only 
 
 ## Concept
 
-When an email is sent through Amazon SES (or bounces or is a complaint), the SNS topic is triggered and some meta data passed to it. The SNS subscription takes the data and executes the Lambda function, passing the data to it. The Lambda function parses the data, checks the notification type ("Bounce", "Delivery", or "Complaint") and extracts some details from the meta data (note: it makes sense to include all header data when you configure the SES notifications). These details are written to a S3 bucket.
+When an email is sent through Amazon SES (or bounces or is a complaint), a SNS topic is triggered, and some meta data passed to it. The SNS subscription takes the data and executes the Lambda function, passing the data to it. The Lambda function parses the data, checks the notification type ("Bounce", "Delivery", or "Complaint") and extracts some details from the meta data (note: it makes sense to include all header data when you configure the SES notifications). These details are written to a S3 bucket.
 
 The code as it stands at the moment uses a key that represents the date/time and message ID, for example "`ses/<DOMAIN>/YYYY/MM/DD/<TIMESTAMP>.<MESSAGE-ID>`".
 
 ## Setup
+
+(No necessarily in this order)
 
 1. Create a new S3 bucket in the same region as your Amazon SES setup.
 2. Create a new Lambda function in the same region as your Amazon SES setup.
@@ -31,7 +33,7 @@ The code as it stands at the moment uses a key that represents the date/time and
 
 ## Notes
 
-If you haven't work with [Amazon Lambda](https://aws.amazon.com/lambda/) yet, the tricky part is probably the configuraion of the the permissions. Every Lambda function requires appropriate access to the component it uses. In this case, [Amazon SES](https://aws.amazon.com/ses/) triggers the Lambda function and the Lambda function writes data to [Amazon S3](https://aws.amazon.com/s3/). You configure the permissions as a role in [Amazon IAM](https://aws.amazon.com/iam/) and select the role when you create the Lambda function.
+If you haven't work with [Amazon Lambda](https://aws.amazon.com/lambda/) yet, the tricky part is probably the configuration of the permissions. Every Lambda function requires appropriate access to the component it uses. In this case, [Amazon SES](https://aws.amazon.com/ses/) triggers the Lambda function and the Lambda function writes data to [Amazon S3](https://aws.amazon.com/s3/). You configure the permissions as a role in [Amazon IAM](https://aws.amazon.com/iam/) and select the role when you create the Lambda function.
 
 ## Copyright and License
 
